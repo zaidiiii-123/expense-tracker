@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">Expense<br>Tracker</div>
+    <!-- <div class="logo-sub">Cloud-Based</div> -->
+  </div>
+  <nav class="nav">
+    <a class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item {% if request.endpoint in ('expenses', 'add_expense', 'edit_expense') %}active{% endif %}" href="{{ url_for('expenses') }}"><span class="nav-icon">↗</span> Expenses</a>
+    <a class="nav-item {% if request.endpoint == 'budgets' %}active{% endif %}" href="{{ url_for('budgets') }}"><span class="nav-icon">◑</span> Budgets</a>
+    <a class="nav-item {% if request.endpoint == 'reports' %}active{% endif %}" href="{{ url_for('reports') }}"><span class="nav-icon">◈</span> Reports</a>
+    <div class="nav-section">Settings</div>
+    <a class="nav-item" href="{{ url_for('logout') }}"><span class="nav-icon">⊙</span> Logout</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="avatar">{{ current_user.name[0]|upper }}</div>
+      <div class="user-info">
+        <div class="name">{{ current_user.name }}</div>
+        <div class="role">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    {% block topbar_actions %}{% endblock %}
+  </div>
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

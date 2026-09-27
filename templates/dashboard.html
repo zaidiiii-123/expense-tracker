@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — Expense Tracker{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block topbar_actions %}
+<a class="topbar-btn btn-primary" href="{{ url_for('add_expense') }}">+ Add Expense</a>
+{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card" style="--c:#FF5757">
+    <div class="stat-icon">💳</div>
+    <div class="stat-label">Total Expenses</div>
+    <div class="stat-value">₹{{ '{:,.2f}'.format(total) }}</div>
+  </div>
+  <div class="stat-card" style="--c:#4DA6FF">
+    <div class="stat-icon">📅</div>
+    <div class="stat-label">This Month</div>
+    <div class="stat-value">₹{{ '{:,.2f}'.format(month_total) }}</div>
+  </div>
+  <div class="stat-card" style="--c:#00D68F">
+    <div class="stat-icon">🧾</div>
+    <div class="stat-label">Transactions</div>
+    <div class="stat-value">{{ count }}</div>
+  </div>
+  <div class="stat-card" style="--c:#FFB547">
+    <div class="stat-icon">⚠️</div>
+    <div class="stat-label">Budget Alerts</div>
+        <div class="stat-value">{{ alerts|length }}</div>
+  </div>
+</div>
+
+{% if alerts %}
+<div style="display:flex;flex-direction:column;gap:8px;margin:14px 0">
+  {% for a in alerts %}
+  <div class="alert-box alert-{{ a.status }}">
+    {{ a.icon }} {{ a.category_name }}:
+    {% if a.status == 'exceeded' %}budget exceeded{% else %}{{ a.percent }}% of budget used{% endif %}
+    (₹{{ '%.2f'|format(a.spent) }} / ₹{{ '%.2f'|format(a.limit_amount) }})
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="section-row">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Monthly Spending</div></div>
+    {% if month_values %}
+    <div style="position:relative;height:260px"><canvas id="barChart"></canvas></div>
+    {% else %}
+    <div class="empty-state">No data yet. Add an expense to see the chart.</div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">By Category</div></div>
+    {% if cat_values %}
+    <div style="position:relative;height:260px"><canvas id="doughnutChart"></canvas></div>
+    {% else %}
+    <div class="empty-state">No data yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Recent Transactions</div>
+    <a class="card-action" href="{{ url_for('expenses') }}">View All →</a>
+  </div>
+  {% if recent %}
+  <table class="txn-table">
+    <thead><tr><th>Category</th><th>Note</th><th>Date</th><th>Amount</th></tr></thead>
+    <tbody>
+      {% for e in recent %}
+      <tr>
+        <td>{{ e.icon }} {{ e.category_name }}</td>
+        <td>{{ e.note or '—' }}</td>
+        <td>{{ e.expense_date.strftime('%d %b %Y') }}</td>
+        <td class="txn-amount">₹{{ '%.2f'|format(e.amount) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">No transactions yet.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const monthLabels = {{ month_labels|tojson }};
+const monthValues = {{ month_values|tojson }};
+const catLabels = {{ cat_labels|tojson }};
+const catValues = {{ cat_values|tojson }};
+const colors = ['#6C63FF', '#FF5757', '#00D68F', '#FFB547', '#4DA6FF', '#9B5DFF', '#FF8FB1'];
+
+Chart.defaults.color = '#9aa0b4';
+
+if (monthValues.length) {
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [{ data: monthValues, backgroundColor: '#6C63FF', borderRadius: 6 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.06)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+if (catValues.length) {
+  new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: catLabels,
+      datasets: [{ data: catValues, backgroundColor: colors, borderWidth: 0 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
+</script>
+{% endblock %}

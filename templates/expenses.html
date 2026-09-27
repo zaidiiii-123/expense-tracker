@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses — Expense Tracker{% endblock %}
+{% block page_title %}Expenses{% endblock %}
+
+{% block topbar_actions %}
+<a class="topbar-btn btn-primary" href="{{ url_for('add_expense') }}">+ Add Expense</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px">
+    <div>
+      <label class="form-label">Category</label>
+      <select class="form-input" name="category_id">
+        <option value="">All</option>
+        {% for c in categories %}
+        <option value="{{ c.category_id }}"
+          {% if c.category_id|string == category_id %}selected{% endif %}>
+          {{ c.icon }} {{ c.category_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="form-label">From</label>
+      <input class="form-input" type="date" name="date_from" value="{{ date_from }}">
+    </div>
+    <div>
+      <label class="form-label">To</label>
+      <input class="form-input" type="date" name="date_to" value="{{ date_to }}">
+    </div>
+    <button class="btn-submit">Filter</button>
+    <a class="btn-cancel" href="{{ url_for('expenses') }}" style="text-decoration:none">Reset</a>
+  </form>
+
+  <div class="card-header">
+    <div class="card-title">All Expenses</div>
+    <div style="font-size:12px;color:var(--text3)">
+      {{ expenses|length }} records · Total ₹{{ '%.2f'|format(total) }}
+    </div>
+  </div>
+
+  {% if expenses %}
+  <table class="txn-table">
+    <thead>
+      <tr><th>Category</th><th>Note</th><th>Date</th><th>Amount</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for e in expenses %}
+      <tr>
+        <td>{{ e.icon }} {{ e.category_name }}</td>
+        <td>{{ e.note or '—' }}</td>
+        <td>{{ e.expense_date.strftime('%d %b %Y') }}</td>
+        <td class="txn-amount">₹{{ '%.2f'|format(e.amount) }}</td>
+        <td style="text-align:right">
+          <a class="action-btn btn-edit" href="{{ url_for('edit_expense', expense_id=e.expense_id) }}">Edit</a>
+          <form method="POST" action="{{ url_for('delete_expense', expense_id=e.expense_id) }}"
+                style="display:inline" onsubmit="return confirm('Delete this expense?')">
+            <button class="action-btn btn-delete">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">No expenses found. Try changing the filters or add a new expense.</div>
+  {% endif %}
+</div>
+{% endblock %}

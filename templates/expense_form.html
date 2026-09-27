@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit' if expense else 'Add' }} Expense — Expense Tracker{% endblock %}
+{% block page_title %}{{ 'Edit' if expense else 'Add' }} Expense{% endblock %}
+
+{% block content %}
+<form class="card" method="POST" style="max-width:520px">
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">Amount (₹)</label>
+      <input class="form-input" type="number" name="amount" step="0.01" min="0.01"
+             value="{{ expense.amount if expense else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" name="expense_date"
+             value="{{ expense.expense_date if expense else '' }}" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Category</label>
+    <select class="form-input" name="category_id" required>
+      {% for c in categories %}
+      <option value="{{ c.category_id }}"
+        {% if expense and expense.category_id == c.category_id %}selected{% endif %}>
+        {{ c.icon }} {{ c.category_name }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Note (optional)</label>
+    <input class="form-input" type="text" name="note" maxlength="255"
+           value="{{ (expense.note or '') if expense else '' }}">
+  </div>
+  <div class="modal-actions">
+    <a class="btn-cancel" href="{{ url_for('expenses') }}" style="text-decoration:none">Cancel</a>
+    <button class="btn-submit">Save</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Budgets — Expense Tracker{% endblock %}
+{% block page_title %}Budgets{% endblock %}
+
+{% block content %}
+<div class="section-row">
+  <div class="card">
+    <div class="card-header"><div class="card-title">This Month's Budgets</div></div>
+    {% for b in budgets %}
+    {% set color = {'ok': '#00D68F', 'warning': '#FFB547', 'exceeded': '#FF5757'}[b.status] %}
+    <div class="budget-item">
+      <div class="budget-header">
+        <div class="budget-name">
+          {{ b.icon }} {{ b.category_name }}
+          {% if b.status == 'exceeded' %}<span class="txn-badge badge-rejected">Exceeded</span>
+          {% elif b.status == 'warning' %}<span class="txn-badge badge-pending">Near limit</span>{% endif %}
+        </div>
+        <div class="budget-amount">
+          ₹{{ '%.2f'|format(b.spent) }} / ₹{{ '%.2f'|format(b.limit_amount) }} ({{ b.percent }}%)
+          <form method="POST" action="{{ url_for('delete_budget', budget_id=b.budget_id) }}"
+                style="display:inline" onsubmit="return confirm('Delete this budget?')">
+            <button class="action-btn btn-delete">✕</button>
+          </form>
+        </div>
+      </div>
+      <div class="budget-bar-bg">
+        <div class="budget-bar-fill" style="width:{{ [b.percent, 100]|min }}%;background:{{ color }}"></div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">No budgets set yet. Set one from the form.</div>
+    {% endfor %}
+  </div>
+
+  <form class="card" method="POST">
+    <div class="card-header"><div class="card-title">Set Budget</div></div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-input" name="category_id" required>
+        {% for c in categories %}
+        <option value="{{ c.category_id }}">{{ c.icon }} {{ c.category_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Monthly Limit (₹)</label>
+      <input class="form-input" type="number" name="limit_amount" step="0.01" min="1" required>
+    </div>
+    <button class="btn-submit" style="width:100%">Save Budget</button>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px">
+      Same category ka budget dobara set karoge to update ho jayega.
+    </p>
+  </form>
+</div>
+{% endblock %}
