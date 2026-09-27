@@ -1,4 +1,5 @@
 import csv
+import os
 import io
 from datetime import date
 from fpdf import FPDF
@@ -12,12 +13,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config.update(
-    SECRET_KEY='i-am-batman-of-the-gotham-zaidiiii',
-    MYSQL_HOST='zephyr.proxy.rlwy.net',
-    MYSQL_PORT=28885,
-    MYSQL_USER='root',
-    MYSQL_PASSWORD='wSkStJFUzlYkDkHSTSPTMysUYHZSWjFs',
-    MYSQL_DB='railway',
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'i-am-batman-of-gotham-hehehehahahaha'),
+    MYSQL_HOST=os.environ.get('MYSQL_HOST', 'zephyr.proxy.rlwy.net'),
+    MYSQL_PORT=int(os.environ.get('MYSQL_PORT', 28885)),
+    MYSQL_USER=os.environ.get('MYSQL_USER', 'root'),
+    MYSQL_PASSWORD=os.environ.get('MYSQL_PASSWORD', 'wSkStJFUzlYkDkHSTSPTMysUYHZSWjFs'),
+    MYSQL_DB=os.environ.get('MYSQL_DB', 'railway'),
     MYSQL_CHARSET='utf8mb4',
     MYSQL_CURSORCLASS='DictCursor',
 )
